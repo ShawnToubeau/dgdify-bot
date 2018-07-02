@@ -9,6 +9,7 @@
   "license": "ISC",
   "dependencies": {
     "markov": "0.0.7",
+    "moment": "^2.22.2",
     "node-twitterbot": "^0.2.2",
     "twit": "^2.2.11"
   },
