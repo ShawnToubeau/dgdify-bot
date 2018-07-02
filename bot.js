@@ -21,7 +21,7 @@ var Bot = new TwitterBot({
  access_token_secret: process.env.BOT_ACCESS_TOKEN_SECRET
 });
 
-// const Bot = new Twit(config.twitterKeys)
+// const Bot = new TwitterBot(config.twitterKey)
 
 var chain = markov(3);
 
