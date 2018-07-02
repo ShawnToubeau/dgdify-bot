@@ -33,20 +33,20 @@ if (hour >= 6 && hour <= 18) {
     fs.readFile('tilian.txt', 'utf8', function(err, data) {  
     if (err) throw err;
         lyrics = data;
-        // Bot.tweet(lyrics);
-        Bot.post('statuses/update', { status: lyrics }, function(err, data, response) {
-            console.log(data)
-        })
+        Bot.tweet(lyrics);
+        // Bot.post('statuses/update', { status: lyrics }, function(err, data, response) {
+        //     console.log(data)
+        // })
     });
 } else {
     //jon
     fs.readFile('jon.txt', 'utf8', function(err, data) {  
     if (err) throw err;
         lyrics = data;
-        // Bot.tweet(lyrics);
-        Bot.post('statuses/update', { status: lyrics }, function(err, data, response) {
-            console.log(data)
-        })
+        Bot.tweet(lyrics);
+        // Bot.post('statuses/update', { status: lyrics }, function(err, data, response) {
+        //     console.log(data)
+        // })
     });
 }
 
