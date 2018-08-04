@@ -1,66 +1,69 @@
 var Twit = require('twit');
-var TwitterBot = require('node-twitterbot').TwitterBot;
-const markov = require('markov');
 var fs = require('fs');
+require('dotenv').config();
 var moment = require('moment-timezone');
-const config = require('./config')
+var hour = moment().tz("America/New_York").format("H")
+var order = 4;
+var nGrams = {};
 
-module.exports = {
-  twitterKeys: {
-    consumer_key: process.env.TWITTER_CONSUMER_KEY,
-    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-    access_token: process.env.TWITTER_ACCESS_TOKEN,
-    access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
-  }
-}
-
-var Bot = new TwitterBot({
- consumer_key: 'Qf2gQMuWfCST1b2ZKwKnr7iPF',
- consumer_secret: '5sq6lTRv1QbxKLjfFyXWhQZ9FhcfouTsbKt7aA12sDMCgjqTvQ',
- access_token: '999879340941807617-qO86BVKAci6osy4XfIt9WcWFRaSvVbF',
- access_token_secret: 'UJq9IbvWS8yFUWBaJD29WDgWeLcHlMADtwqs60jdaeHdq'
+var Bot = new Twit({
+ consumer_key: process.env.TWITTER_CONSUMER_KEY,
+ consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+ access_token: process.env.TWITTER_ACCESS_TOKEN,
+ access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 });
 
-var chain = markov(3);
-
-var hour = moment().tz("America/New_York").format("H")
-var lyrics = null;
-
-const tweet = () => {
-    console.log("setting lyrics..")
+function selectLyrics() {
     if (hour >= 6 && hour <= 18) {
-        fs.readFile('tilian.txt', 'utf8', function(err, data) {  
+        fs.readFile('tilian.txt', 'utf8', function(err, lyrics) {  
             if (err) throw err;
-                lyrics = data;
-                console.log("set lyrics to tilian")
-                chain.seed(lyrics, function() {
-                    console.log("making tweet")
-                    try {  
-                        var res = chain.respond('<Buffer 0a>', 8).join(' ');
-                        Bot.tweet(res);
-                        console.log(res)
-                    } catch(e) {
-                        console.log('Error:', e.stack);
-                    }
-                }); 
-            });
+                tweet(lyrics);
+        });
     } else {
-        fs.readFile('jon.txt', 'utf8', function(err, data) {  
-        if (err) throw err;
-            lyrics = data;
-            console.log("set lyrics to jon")
-            chain.seed(lyrics, function() {
-                console.log("making tweet")
-                try {  
-                    var res = chain.respond('<Buffer 0a>', 8).join(' ');
-                    Bot.tweet(res);
-                    console.log(res)
-                } catch(e) {
-                    console.log('Error:', e.stack);
-                }
-            }); 
+        fs.readFile('jon.txt', 'utf8', function(err, lyrics) {  
+            if (err) throw err;
+                tweet(lyrics);
         });
     }
 }
 
-tweet();
+function getTweetStart(lyrics) {
+    var random = Math.floor(Math.random()*lyrics.length)
+    return lyrics.substring(random, random + order)
+}
+
+function makeEngramTable(lyrics) {
+    for (var i = 0; i < lyrics.length - order; i++) {
+        var gram = lyrics.substring(i, i + order);
+
+        if (!nGrams[gram]) {
+            nGrams[gram] = [];
+        }
+        nGrams[gram].push(lyrics.charAt(i + order));
+    }
+}
+
+function tweet(lyrics) {
+    makeEngramTable(lyrics);
+    var currentGram = getTweetStart(lyrics);
+
+    while (!currentGram.match(/^[0-9a-zA-Z]+$/)) {
+        currentGram = getTweetStart(lyrics);
+    }
+    var tweet = currentGram;
+
+    for (var j = 0; j < 150; j++) {
+        var possibilities = nGrams[currentGram];
+        var next = possibilities[Math.floor(Math.random()*possibilities.length)];
+        tweet += next;
+        var len = tweet.length;
+        currentGram = tweet.substring(len-order, len);
+    }
+    console.log(tweet)
+    Bot.post('statuses/update', {status: tweet}, function(error, tweet, response) {
+        if (error) throw error;
+        // console.log(tweet)
+    });
+}
+
+selectLyrics();
