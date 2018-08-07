@@ -52,7 +52,7 @@ function tweet(lyrics) {
     }
     var tweet = currentGram;
 
-    for (var j = 0; j < 150; j++) {
+    for (var j = 0; (j < 150) || (tweet.charAt(j) == ' '); j++) {
         var possibilities = nGrams[currentGram];
         var next = possibilities[Math.floor(Math.random()*possibilities.length)];
         tweet += next;
