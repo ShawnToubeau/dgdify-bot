@@ -80,7 +80,6 @@ async function tweet() {
             if (error) {
                 console.log(error.message);
             };
-            // console.log(tweet)
         });
       }
     catch (error) {
