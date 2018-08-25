@@ -54,7 +54,6 @@ function makeEngramTable(lyrics) {
 async function tweet() {
     try {
         let lyrics = await getLyrics;
-        // console.log(lyrics)
 
         makeEngramTable(lyrics);
         let currentGram = pickRandomStart(lyrics);
@@ -78,12 +77,12 @@ async function tweet() {
 
         Bot.post('statuses/update', {status: tweet}, function(error, tweet, response) {
             if (error) {
-                console.log(error.message);
+                console.log("Error making post. ", error.message);
             };
         });
       }
     catch (error) {
-        console.log(error.message);
+        console.log("Unable to get lyrics.", error.message);
     }
 }
 
